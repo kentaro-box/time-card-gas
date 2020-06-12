@@ -10,7 +10,7 @@ function doGet() {
 function checkUser(data) {
   data = JSON.parse(data);
 
-  var spreadsheet = SpreadsheetApp.openById('1b3KeY91XbHCdp9TPbeZYYtfFnS3DDxJKc6R-sZAhgPs');
+  var spreadsheet = SpreadsheetApp.openById('1');
   var sheet = spreadsheet.getSheetByName('Info');
   var lastRow = sheet.getDataRange().getLastRow(); //対象となるシートの最終行を取得
 
@@ -458,10 +458,10 @@ function getSpredSheet(data) {
   data = JSON.parse(data);
   switch (data[0]) {
     case "山田":
-      var spreadsheet = SpreadsheetApp.openById('1loV6Ob1WLxTl5Yn8qJeagBSaNG7B5u4B8xcYdtqCLlw');
+      var spreadsheet = SpreadsheetApp.openById('1');
       break;
     case "市川":
-      var spreadsheet = SpreadsheetApp.openById('1Z7o6PUaFyIpL95MVQEQCMLywGfcTfUJr5f8UNvLWBwQ');
+      var spreadsheet = SpreadsheetApp.openById('1');
       break;
   }
   return spreadsheet;
