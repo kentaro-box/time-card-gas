@@ -9,8 +9,14 @@ function doGet() {
 //------------- ユーザーの判定 ---------------//
 function checkUser(data) {
   data = JSON.parse(data);
+  
+  
+  
+  //スクリプトプロパティの値を取得
+  var prop = PropertiesService.getScriptProperties();
+  var res = prop.getProperty("判定用シートID");
 
-  var spreadsheet = SpreadsheetApp.openById('1');
+  var spreadsheet = SpreadsheetApp.openById(res);
   var sheet = spreadsheet.getSheetByName('Info');
   var lastRow = sheet.getDataRange().getLastRow(); //対象となるシートの最終行を取得
 
@@ -456,12 +462,17 @@ function timeOutRecord(userData) {
 function getSpredSheet(data) {
 
   data = JSON.parse(data);
+  
+  var prop = PropertiesService.getScriptProperties();
+  var resYamada = prop.getProperty("山田シートID");
+  var resIchikawa = prop.getProperty("市川シートID");
+  
   switch (data[0]) {
     case "山田":
-      var spreadsheet = SpreadsheetApp.openById('1');
+      var spreadsheet = SpreadsheetApp.openById(resYamada);
       break;
     case "市川":
-      var spreadsheet = SpreadsheetApp.openById('1');
+      var spreadsheet = SpreadsheetApp.openById(resIchikawa);
       break;
   }
   return spreadsheet;
