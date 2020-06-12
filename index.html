@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <?!= HtmlService.createHtmlOutputFromFile('css').getContent(); ?>
+    <base target="_top">
+  </head>
+
+  <body>
+    <div id="center">
+      <div id="inner">
+        <h1>TimeCard</h1>
+        <div id="viewToday"></div>
+        <p>
+          <button onclick="work()">出勤</button>
+          <button onclick="leave()">退勤</button>
+          
+        </p>
+        <p>
+          <button onclick="rest()">休憩</button>
+          <button onclick="endRest()">休憩終了</button>      
+        </p>
+      </div>
+      <div id="viewToday"></div>
+    </div>
+    <?!= HtmlService.createHtmlOutputFromFile('js').getContent(); ?>
+  </body>
+
+</html>
