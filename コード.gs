@@ -197,9 +197,13 @@ function timeOutRecord(userData) {
   var work_date_month = Number(work_in_date[1]);
   var work_date_day = Number(work_in_date[2]);
 
-  var morning_legal_time = new Date(work_date_year, work_date_month, work_date_day, 05, 00, 000);
-  var midnight_legal_time = new Date(work_date_year, work_date_month, work_date_day, 22, 00, 000);
-  var next_day = new Date(work_date_year, work_date_month, work_date_day + 1, 00, 00, 000);
+  var morning_legal_time = new Date(work_date_year, work_date_month -1, work_date_day, 05, 00, 000);
+  console.log(morning_legal_time);
+  console.log(morning_legal_time.getTime());
+  var midnight_legal_time = new Date(work_date_year, work_date_month -1, work_date_day, 22, 00, 000);
+  console.log(midnight_legal_time);
+  var next_day = new Date(work_date_year, work_date_month -1, work_date_day + 1, 00, 00, 000);
+  console.log(next_day);
 
   var check = sheet.getRange(lastRow, 4).getValue();
 
@@ -220,10 +224,12 @@ function timeOutRecord(userData) {
 
   // 出勤時間
   var start_time = sheet.getRange(lastRow, 3).getValue();
+  console.log(start_time);
   // 退社時間
   var end_time = sheet.getRange(lastRow, 4).getValue();
   // 各時間をミリ秒に
   var get_time_start = start_time.getTime();
+  console.log("get_time_start"+get_time_start);
   var get_time_end = end_time.getTime();
 
   // 休憩していれば労働時間から休憩時間を引く
@@ -235,6 +241,7 @@ function timeOutRecord(userData) {
     // 法定時間外の休憩時間
     // 早朝時間帯の休憩
     if (morning_legal_time.getTime() > restStartTime.getTime()) {
+      console.log(1-1);
       var morning_out_legal_time = morning_legal_time.getTime() - restStartTime.getTime();
       // それ以外の休憩
       var morning_in_legal_time = restStartTime.getTime() - morning_out_legal_time;
@@ -246,59 +253,73 @@ function timeOutRecord(userData) {
     console.log(midnight_legal_time);
     // 深夜時間帯の休憩
     if (restEndTime.getTime() > midnight_legal_time.getTime()) {
+      console.log(1-2);
       var midnight_out_legal_time = restEndTime.getTime() - midnight_legal_time.getTime();
       // それ以外の休憩
       var midnight_in_legal_time = restEndTime.getTime() - midnight_out_legal_time;
       // 深夜日付跨ぐ休憩
       if (restEndTime.getTime() > next_day.getTime()) {
+        console.log(1-3);
         var next_day_out_legal_rest_time = restEndTime.getTime() - next_day.getTime();
         midnight_out_legal_time = midnight_out_legal_time - next_day_out_legal_rest_time;
       }
     }
     // 休憩時間全部
     var rest_time = restEndTime.getTime() - restStartTime.getTime();
-
+    console.log(1-4);
     rest_time = computeDuration(rest_time);
     sheet.getRange(lastRow, 7).setNumberFormat('H:mm')
     sheet.getRange(lastRow, 7).setValue(rest_time);
-
-
   }
+  console.log("get_time_start:"+get_time_start);
+  console.log("morning_legal_time.getTime():"+morning_legal_time.getTime());
+  console.log("get_time_end;"+ get_time_end);
+  console.log("midnight_legal_time.getTime():"+ midnight_legal_time.getTime());
+  console.log(get_time_start < morning_legal_time.getTime());
+  console.log(midnight_legal_time.getTime() < get_time_end);
 
   // 休憩していなければ
   // 法定時間内か法定時間外か、法定時間外であれば日付跨いでないか
   if (get_time_start < morning_legal_time.getTime() && midnight_legal_time.getTime() < get_time_end) {
+    console.log(1);
     var work_time = get_time_end - get_time_start;
     var work_out_leagl_time = (morning_legal_time.getTime() - get_time_start) + (get_time_end - midnight_legal_time.getTime());
 //    work_time = work_time - work_out_leagl_time;
 
 
     if (get_time_end > next_day.getTime()) {
+          console.log(2);
+      var work_time = get_time_end - get_time_start;
       var next_day_out_leagl_time = get_time_end - next_day.getTime();
       work_out_leagl_time = work_out_leagl_time - next_day_out_leagl_time;
 //      work_time - work_out_leagl_time;
     }
 
-  } else if (get_time_start < morning_legal_time.getTime() && midnight_legal_time.getTime() < get_time_end) {
-    var work_time = get_time_end - get_time_start;
-    var work_out_leagl_time = (morning_legal_time.getTime() - get_time_start) - (get_time_end - midnight_legal_time.getTime());
-    work_time -work_out_leagl_time;
-  }  else if (get_time_start < morning_legal_time.getTime()) {
+  } else if (get_time_start < morning_legal_time.getTime()) {
+    console.log(4);
     var work_time = get_time_end - get_time_start;
     var work_out_leagl_time = (morning_legal_time.getTime() - get_time_start);
 //    work_time - work_out_leagl_time;
   } else if (midnight_legal_time.getTime() < get_time_end) {
+    console.log(5);
     var work_time = get_time_end - get_time_start;
     work_out_leagl_time = work_out_leagl_time - (get_time_end - midnight_legal_time.getTime());
 //    work_time - work_out_leagl_time;
 
     if (get_time_end > next_day.getTime()) {
+      console.log(6);
       var next_day_out_leagl_time = get_time_end - next_day.getTime();
       work_out_leagl_time = work_out_leagl_time - next_day_out_leagl_time;
 //      work_time - work_out_leagl_time;
     }
+  }else {
+    console.log(11111);
+    var work_time = get_time_end - get_time_start;
+    console.log(work_time);
   }
-
+  
+  
+console.log("morning_legal_time.getTime():"+　computeDuration( morning_legal_time.getTime()));
   console.log(typeof midnight_out_legal_time);
   // 法定外で休憩
   if (typeof morning_out_legal_time != "undefined") {
@@ -317,7 +338,7 @@ function timeOutRecord(userData) {
 //    work_time - next_day_out_legal_rest_time;
   }
 
-  
+  console.log(typeof work_out_leagl_time);
  
   if (typeof work_out_leagl_time == 'undefined') {
     sheet.getRange(lastRow, 9).setNumberFormat('H:mm')
@@ -362,14 +383,13 @@ function timeOutRecord(userData) {
       sheet.getRange(lastRow, 10).setValue(next_day_out_leagl_time);
     } 
     
-     
-     work_time = computeDuration(work_time);
-     sheet.getRange(lastRow, 8).setNumberFormat('H:mm')
-     sheet.getRange(lastRow, 8).setValue(work_time);
-
   }
 
-
+console.log(work_time);
+     work_time = computeDuration(work_time);
+    console.log(work_time);
+     sheet.getRange(lastRow, 8).setNumberFormat('H:mm')
+     sheet.getRange(lastRow, 8).setValue(work_time);
 
   // ミリ秒変換
   function computeDuration(ms) {
@@ -448,13 +468,6 @@ function timeOutRecord(userData) {
   // 深夜勤務時間であれば深夜時間切り分け
   return "お疲れ様でした！\nお気をつけておかえりくださいね！";
 }
-
-
-
-
-
-
-
 
 
 // ------------ スプレッドシートの取得 ------------------ //

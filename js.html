@@ -1,7 +1,18 @@
 <script>
 // HTMLに時間表示
+
+function showTime() {
 var [now, year, month, day, weekName, hour, min, sec, s] = getToday();
 document.getElementById("viewToday").textContent = s;
+}
+
+function setFig(num) {
+   // 桁数が1桁だったら先頭に0を加えて2桁に調整する
+   var ret;
+   if( num < 10 ) { ret = "0" + num; }
+   else { ret = num; }
+   return ret;
+}
 
 function getToday() {
   var now = new Date();
@@ -11,16 +22,18 @@ function getToday() {
   var week = now.getDay(); //曜日(0～6=日～土)
   var weeks = ["日", "月", "火", "水", "木", "金", "土"];
   var weekName = weeks[week];
-  var hour = now.getHours();
-  var min = now.getMinutes();
-  var sec = now.getSeconds();
+  var hour = setFig(now.getHours());
+  var min = setFig(now.getMinutes());
+  var sec = setFig(now.getSeconds());
 
   //曜日の選択肢
   var youbi = new Array("日", "月", "火", "水", "木", "金", "土");
   //出力用
-  var s = year + "/" + month + "/" + day + "(" + weekName + ")   " + hour + ":" + min;
+  var s = year + "/" + month + "/" + day + "(" + weekName + ")   " + hour + ":" + min+":"+sec;
   return [now, year, month, day, weekName, hour, min, sec, s];
 }
+
+setInterval("showTime()",1000);
 
 // ユーザー情報取得
 function getData() {
