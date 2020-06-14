@@ -41,8 +41,11 @@ function getData() {
   var data = [];
   var name = window.prompt('名前を入力してください');
   var pass = window.prompt('パスワードを入力してください');
+//  var userAgent = navigator.userAgent;
+
   data.push(name);
   data.push(pass);
+//  data.push(userAgent);
   data = JSON.stringify(data);
   return data;
 }

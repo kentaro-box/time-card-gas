@@ -17,7 +17,7 @@ function checkUser(data) {
   var res = prop.getProperty("判定用シートID");
 
   var spreadsheet = SpreadsheetApp.openById(res);
-  var sheet = spreadsheet.getSheetByName('Info');
+  var sheet = spreadsheet.getSheetByName('EmployeeInfo');
   var lastRow = sheet.getDataRange().getLastRow(); //対象となるシートの最終行を取得
 
   var names = [];
@@ -58,7 +58,17 @@ function timeInRecord(userData) {
 
   var spreadsheet = getSpredSheet(userData);
   userData = JSON.parse(userData);
+  
+  var prop = PropertiesService.getScriptProperties();
+  var res = prop.getProperty("判定用シートID");
 
+  var timesCardSpreadsheet = SpreadsheetApp.openById(res);
+  var TimeCardsheet = timesCardSpreadsheet.getSheetByName('CompanyRegulations');
+  var ceiling = TimeCardsheet.getRange(2, 1).getValue();
+  
+  console.log(ceiling);
+  console.log(typeof ceiling);
+  
   var [now, year, month, day, weekName, hour, min, sec, s, today] = getToday();
 
   // 月替りに新しいシート作成
@@ -75,10 +85,11 @@ function timeInRecord(userData) {
     sheet.getRange(1, 4).setValue("退社時間");
     sheet.getRange(1, 5).setValue("休憩開始時間");
     sheet.getRange(1, 6).setValue("休憩終了時間");
-    sheet.getRange(1, 7).setValue("日中勤務時間");
-    sheet.getRange(1, 8).setValue("深夜帯勤務時間");
-    sheet.getRange(1, 8).setValue("深夜日付跨ぐ");
-    sheet.getRange(1, 10).setValue("UserAgent");
+    sheet.getRange(1, 7).setValue("休憩時間合計");
+    sheet.getRange(1, 8).setValue("日中勤務時間");
+    sheet.getRange(1, 9).setValue("深夜帯勤務時間");
+    sheet.getRange(1, 10).setValue("深夜日付跨ぐ");
+    sheet.getRange(1, 11).setValue("UserAgent");
   }
 
 
@@ -181,7 +192,21 @@ function endRestTime(userData) {
 function timeOutRecord(userData) {
   var spreadsheet = getSpredSheet(userData);
   userData = JSON.parse(userData);
+  
+  // 丸める時間取得
+//  var prop = PropertiesService.getScriptProperties();
+//  var res = prop.getProperty("判定用シートID");
+//
+//  var spreadsheet = SpreadsheetApp.openById(res);
+//  var TimeCardsheet = spreadsheet.getSheetByName('CompanyRegulations');
+//  var ceiling = TimeCardsheet.getRange(2, 1).getValue();
+//  
+//  console.log(ceiling);
+//  console.log(typeof ceiling);
+//  
+//  consoe.log(2222);
 
+  // 日時取得
   var [now, year, month, day, weekName, hour, min, sec, s, today] = getToday();
   // 法定時間外判別用
 
@@ -246,11 +271,7 @@ function timeOutRecord(userData) {
       // それ以外の休憩
       var morning_in_legal_time = restStartTime.getTime() - morning_out_legal_time;
     }
-    console.log(restEndTime.getTime() > midnight_legal_time.getTime());
-    console.log(restEndTime.getTime());
-    console.log(midnight_legal_time.getTime());
-    console.log(restEndTime);
-    console.log(midnight_legal_time);
+    
     // 深夜時間帯の休憩
     if (restEndTime.getTime() > midnight_legal_time.getTime()) {
       console.log(1-2);
@@ -271,20 +292,14 @@ function timeOutRecord(userData) {
     sheet.getRange(lastRow, 7).setNumberFormat('H:mm')
     sheet.getRange(lastRow, 7).setValue(rest_time);
   }
-  console.log("get_time_start:"+get_time_start);
-  console.log("morning_legal_time.getTime():"+morning_legal_time.getTime());
-  console.log("get_time_end;"+ get_time_end);
-  console.log("midnight_legal_time.getTime():"+ midnight_legal_time.getTime());
-  console.log(get_time_start < morning_legal_time.getTime());
-  console.log(midnight_legal_time.getTime() < get_time_end);
-
+ 
   // 休憩していなければ
   // 法定時間内か法定時間外か、法定時間外であれば日付跨いでないか
   if (get_time_start < morning_legal_time.getTime() && midnight_legal_time.getTime() < get_time_end) {
     console.log(1);
     var work_time = get_time_end - get_time_start;
     var work_out_leagl_time = (morning_legal_time.getTime() - get_time_start) + (get_time_end - midnight_legal_time.getTime());
-//    work_time = work_time - work_out_leagl_time;
+    work_time = work_time - work_out_leagl_time;
 
 
     if (get_time_end > next_day.getTime()) {
@@ -292,25 +307,26 @@ function timeOutRecord(userData) {
       var work_time = get_time_end - get_time_start;
       var next_day_out_leagl_time = get_time_end - next_day.getTime();
       work_out_leagl_time = work_out_leagl_time - next_day_out_leagl_time;
-//      work_time - work_out_leagl_time;
+      work_time = work_time - work_out_leagl_time;
     }
 
   } else if (get_time_start < morning_legal_time.getTime()) {
     console.log(4);
     var work_time = get_time_end - get_time_start;
-    var work_out_leagl_time = (morning_legal_time.getTime() - get_time_start);
-//    work_time - work_out_leagl_time;
+    var work_out_leagl_time = morning_legal_time.getTime() - get_time_start;
+    work_time = work_time - work_out_leagl_time;
   } else if (midnight_legal_time.getTime() < get_time_end) {
     console.log(5);
     var work_time = get_time_end - get_time_start;
-    work_out_leagl_time = work_out_leagl_time - (get_time_end - midnight_legal_time.getTime());
-//    work_time - work_out_leagl_time;
+    var work_out_leagl_time = get_time_end - midnight_legal_time.getTime();
+    console.log("work_out_leagl_time"+work_out_leagl_time);
+    work_time = work_time - work_out_leagl_time;
 
     if (get_time_end > next_day.getTime()) {
       console.log(6);
       var next_day_out_leagl_time = get_time_end - next_day.getTime();
       work_out_leagl_time = work_out_leagl_time - next_day_out_leagl_time;
-//      work_time - work_out_leagl_time;
+      work_time = work_time - work_out_leagl_time;
     }
   }else {
     console.log(11111);
@@ -324,18 +340,18 @@ console.log("morning_legal_time.getTime():"+　computeDuration( morning_legal_ti
   // 法定外で休憩
   if (typeof morning_out_legal_time != "undefined") {
     work_out_leagl_time = work_out_leagl_time - morning_out_legal_time;
-//    work_time - morning_out_legal_time;
+    work_time - morning_out_legal_time;
   }
 
   if (typeof midnight_out_legal_time != "undefined") {
     work_out_leagl_time = work_out_leagl_time - midnight_out_legal_time;
     console.log("aaaa");
-//    work_time - midnight_out_legal_time;
+    work_time - midnight_out_legal_time;
   }
 
   if (typeof next_day_out_legal_rest_time != "undefined") {
     work_out_leagl_time = next_day_out_leagl_time - next_day_out_legal_rest_time;
-//    work_time - next_day_out_legal_rest_time;
+    work_time - next_day_out_legal_rest_time;
   }
 
   console.log(typeof work_out_leagl_time);
@@ -355,7 +371,6 @@ console.log("morning_legal_time.getTime():"+　computeDuration( morning_legal_ti
       sheet.getRange(lastRow, 10).setValue(0);
     } else {
 
-
       // 祝日の取得
       const id = 'ja.japanese#holiday@group.v.calendar.google.com';
       const cal = CalendarApp.getCalendarById(id);
@@ -373,22 +388,30 @@ console.log("morning_legal_time.getTime():"+　computeDuration( morning_legal_ti
       var weekName = new Date(year, month, day).getDay();
 
       // 祝日・日曜・土曜ならマーカー
-      if (foriday == false || weekName != 0 || weekName != 6) {
-        sheet.getRange(lastRow, 10).setBackground("#fffff");
-      } else {
+      if (next_day == foriday || next_day.getDay() == 0 || next_day.getDay() == 6) {
+        console.log(next_day);
+        console.log(foriday);
+        console.log(next_day.getDay());
+        console.log("not");
         sheet.getRange(lastRow, 10).setBackground("#e8f0fe");
+        
+      } else {
+        console.log("yes");
+        sheet.getRange(lastRow, 10).setBackground("#fffff");
       }
       sheet.getRange(lastRow, 10).setNumberFormat('H:mm')
+      
       next_day_out_leagl_time = computeDuration(next_day_out_leagl_time);
       sheet.getRange(lastRow, 10).setValue(next_day_out_leagl_time);
     } 
     
   }
 
-console.log(work_time);
+
      work_time = computeDuration(work_time);
-    console.log(work_time);
+     
      sheet.getRange(lastRow, 8).setNumberFormat('H:mm')
+//     sheet.getRange(lastRow, 8).strformula("=CEILING("+ work_time + ",0:15)");
      sheet.getRange(lastRow, 8).setValue(work_time);
 
   // ミリ秒変換
@@ -463,12 +486,27 @@ console.log(work_time);
   if (typeof morning_out_legal_time != "undefined" && midnight_out_legal_time != "undefined") {
     return "長時間お疲れ様でした！\nお気をつけておかえりくださいね！";
   }
+  
+  
 
 
   // 深夜勤務時間であれば深夜時間切り分け
   return "お疲れ様でした！\nお気をつけておかえりくださいね！";
 }
 
+// ------------ スプレッドシートから計算 ------------------ //
+
+function onOpen(){
+ 
+  //メニュー配列
+  var myMenu=[
+    {name: "メール送信", functionName: "sendMail"},
+    {name: "配信リスト更新", functionName: "inportContacts2"}
+  ];
+ 
+  SpreadsheetApp.getActiveSpreadsheet().addMenu("メール",myMenu); //メニューを追加
+ 
+}
 
 // ------------ スプレッドシートの取得 ------------------ //
 
