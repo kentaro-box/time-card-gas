@@ -516,7 +516,7 @@ function writeTime(sheet) {
   // 通常時間集計
   if (no_color.length > 0) {
     sheet.getRange(1, 13).setValue("通常時間合計");
-    sheet.getRange(1, 15).setValue("通常深夜・早朝時間");
+    sheet.getRange(1, 15).setValue("通常深夜");
     var sum;
     var out_time_sum;
     for (var j = 0; j < no_color.length; j++) {
@@ -546,43 +546,71 @@ function writeTime(sheet) {
 
   // 通常時間割増
   if (has_color.length > 0) {
-    sheet.getRange(1, 14).setValue("休日割増時間合計");
+    sheet.getRange(1, 14).setValue("休日シフト時間");
+    sheet.getRange(1, 16).setValue("休日シフト深夜時間");
     var has_color_sum;
     var has_color_out_time_sum;
-    console.log("レングス" + has_color.length);
     for (var h = 0; h < has_color.length; h++) {
       if (h == 0) {
         if (has_color.length == 1) {
           console.log("あ");
           has_color_sum = "=SUM(H" + has_color_sum[h] + ")";
-          //          has_color_out_time_sum = "=SUM(I" + has_color_sum[j] + ")";
+          has_color_out_time_sum = "=SUM(I" + has_color[h] + ")";
         } else {
           has_color_sum = "=SUM(H" + has_color[h];
-          //        has_color_out_time_sum = "=SUM(I" + has_color_sum[j] + ")";
+          has_color_out_time_sum = "=SUM(I" + has_color[h];
         }
 
 
       } else if (h == has_color.length - 1) {
         console.log("う");
         has_color_sum = has_color_sum + ",H" + has_color[h] + ")";
-        //has_color_out_time_sum = "=SUM(I" + has_color_sum[j] + ")";
+        has_color_out_time_sum = has_color_out_time_sum + ",I" + has_color[h] + ")";
       } else {
         console.log("え");
         has_color_sum = has_color_sum + ",H" + has_color[h];
-        //        has_color_out_time_sum = "=SUM(I" + has_color_sum[j] + ")";
+        has_color_out_time_sum = has_color_out_time_sum + ",I" + has_color[h] + ")";
       }
     }
     // 休日時間割増
     sheet.getRange(2, 14).setNumberFormat('[h]:mm')
     sheet.getRange(2, 14).setFormula(has_color_sum);
-    //    sheet.getRange(2, 14).setNumberFormat('[h]:mm')
-    //    sheet.getRange(2, 14).setFormula(has_color_sum);
+    sheet.getRange(2, 16).setNumberFormat('[h]:mm')
+    sheet.getRange(2, 16).setFormula(has_color_out_time_sum);
 
+  }
+  
+  if (midnight_no_color.length > 0) {
+    sheet.getRange(1, 17).setValue("深夜翌日またぎ 平日");
+    var midnight_no_color_sum;
+
+    for (var k = 0; k < midnight_no_color.length; k++) {
+      if (k == 0) {
+        if (midnight_no_color.length == 1) {
+          console.log(11);
+          midnight_no_color_sum = "=SUM(J" + midnight_no_color[k] + ")";
+        } else {
+          console.log(12);
+          midnight_no_color_sum = "=SUM(J" + midnight_no_color[k];
+        }
+
+      } else if (k == midnight_no_color.length - 1) {
+        console.log(13);
+        midnight_no_color_sum = midnight_no_color_sum + ",J" + midnight_no_color[k] + ")";
+
+      } else {
+        console.log(14);
+        midnight_no_color_sum = midnight_no_color_sum + ",J" + midnight_no_color[k];
+      }
+    }
+    // 休日時間割増
+    sheet.getRange(2, 17).setNumberFormat('[h]:mm')
+    sheet.getRange(2, 17).setFormula(midnight_no_color_sum);
   }
 
 
   if (midnight_has_color.length > 0) {
-    sheet.getRange(1, 16).setValue("祝日＋深夜早朝 割増");
+    sheet.getRange(1, 18).setValue("休日深夜翌日またぎ 割増");
     var midnight_has_color_sum;
 
     for (var k = 0; k < midnight_has_color.length; k++) {
@@ -605,8 +633,8 @@ function writeTime(sheet) {
       }
     }
     // 休日時間割増
-    sheet.getRange(2, 16).setNumberFormat('[h]:mm')
-    sheet.getRange(2, 16).setFormula(midnight_has_color_sum);
+    sheet.getRange(2, 18).setNumberFormat('[h]:mm')
+    sheet.getRange(2, 18).setFormula(midnight_has_color_sum);
   }
 
 }
