@@ -409,6 +409,7 @@ function timeOutRecord(userData) {
 
 
   writeTime(sheet);
+  Utilities.sleep(500);
   
   sumTime(sheet, spreadsheet, userData);
 
@@ -556,14 +557,13 @@ function writeTime(sheet) {
       if (h == 0) {
         if (has_color.length == 1) {
           console.log("あ");
-          has_color_sum = "=SUM(H" + has_color_sum[h] + ")";
+          console.log(has_color[h]);
+          has_color_sum = "=SUM(H" + has_color[h] + ")";
           has_color_out_time_sum = "=SUM(I" + has_color[h] + ")";
         } else {
           has_color_sum = "=SUM(H" + has_color[h];
           has_color_out_time_sum = "=SUM(I" + has_color[h];
         }
-
-
       } else if (h == has_color.length - 1) {
         console.log("う");
         has_color_sum = has_color_sum + ",H" + has_color[h] + ")";
@@ -644,43 +644,63 @@ function writeTime(sheet) {
 function sumTime(sheet, spreadsheet, userData) {
   
   
-  // 丸める時間取得
-  //  var prop = PropertiesService.getScriptProperties();
-  //  var res = prop.getProperty("判定用シートID");
-  //
-  //  var spreadsheet = SpreadsheetApp.openById(res);
-  //  var TimeCardsheet = spreadsheet.getSheetByName('CompanyRegulations');
-  //  var ceiling = TimeCardsheet.getRange(2, 1).getValue();
-  //  
-  //  console.log(ceiling);
-  //  console.log(typeof ceiling);
-  //  
-  //  consoe.log(2222);
-
   // 日時取得
   var [now, year, month, day, weekName, hour, min, sec, s, today] = getToday();
   // 法定時間外判別用
 
   var lastRow = sheet.getLastRow(); //対象となるシートの最終行を取得
   
-  var multiply_col13 = sheet.getRange(2, 13).getValue();
-  var multiply_col14 = sheet.getRange(2, 14).getValue();
-  var multiply_col15 = sheet.getRange(2, 15).getValue();
-  var multiply_col16 = sheet.getRange(2, 16).getValue();
-  var multiply_col17 = sheet.getRange(2, 17).getValue();
-  var multiply_col18 = sheet.getRange(2, 18).getValue();
+  var multiply_col13 = sheet.getRange(2, 13).getDisplayValue().split(":");
+  var multiply_col14 = sheet.getRange(2, 14).getDisplayValue().split(":");
+  var multiply_col15 = sheet.getRange(2, 15).getDisplayValue().split(":");
+  var multiply_col16 = sheet.getRange(2, 16).getDisplayValue().split(":");
+  var multiply_col17 = sheet.getRange(2, 17).getDisplayValue().split(":");
+  var multiply_col18 = sheet.getRange(2, 18).getDisplayValue().split(":");
   
- 
-  var multiply_1 = Number(new Date(multiply_col13).getHours()) + Number(new Date(multiply_col13).getMinutes()/60);
-  var multiply_125 = (Number(new Date(multiply_col17).getHours()) + Number(new Date(multiply_col17).getMinutes()/60)) + (Number(new Date(multiply_col15).getHours()) + Number(new Date(multiply_col15).getMinutes()/60));
-  var multiply_135 = Number(new Date(multiply_col14).getHours()) + Number(new Date(multiply_col14).getMinutes()/60);
-  var multiply_160 = (Number(new Date(multiply_col16).getHours()) + Number(new Date(multiply_col16).getMinutes()/60)) + (Number(new Date(multiply_col18).getHours()) + Number(new Date(multiply_col18).getMinutes()/60));
+  var multiply_col13_h = Number(multiply_col13[0]);
+  var multiply_col13_m = Number(multiply_col13[1])/60;
+  var multiply_col14_h = Number(multiply_col14[0]);
+  var multiply_col14_m = Number(multiply_col14[1])/60;
+  var multiply_col15_h = Number(multiply_col15[0]);
+  var multiply_col15_m = Number(multiply_col15[1])/60;
+  var multiply_col16_h = Number(multiply_col16[0]);
+  var multiply_col16_m = Number(multiply_col16[1])/60;
+  var multiply_col17_h = Number(multiply_col17[0]);
+  var multiply_col17_m = Number(multiply_col17[1])/60;
+  var multiply_col18_h = Number(multiply_col18[0]);
+  var multiply_col18_m = Number(multiply_col18[1])/60;
   
-  sheet.getRange(14, 1).setValue(multiply_1);
-  sheet.getRange(14, 2).setValue(multiply_125);
-  sheet.getRange(14, 3).setValue(multiply_135);
-  sheet.getRange(14, 4).setValue(multiply_160);
   
+  var multiply_1 = multiply_col13_h + multiply_col13_m;
+  var multiply_125 = (multiply_col17_h + multiply_col15_h) + (multiply_col17_m + multiply_col15_m);
+  var multiply_135 = multiply_col14_h + multiply_col14_m;
+  var multiply_160 = (multiply_col16_h + multiply_col18_h) + (multiply_col16_m + multiply_col18_m);
+  
+  
+  if (spreadsheet.getSheetByName(year + "/" + month) == null) {
+    var personal_sheet = spreadsheet.insertSheet(year + "/" + month);
+  }
+    var personal_sheet = spreadsheet.getSheetByName(year + "/" + month);
+  
+  personal_sheet.getRange(1, 1).setValue(multiply_1);
+  personalData(userData);
+}
+
+function personalData(userData) {
+  var prop = PropertiesService.getScriptProperties();
+  var res = prop.getProperty("判定用シートID");
+  var prop_spreadsheet = SpreadsheetApp.openById(res);
+  var info_sheet = prop_spreadsheet.getSheetByName('EmployeeInfo');
+  var last_row = info_sheet.getLastRow();
+  
+  var name = [];
+  for (var i = 2; i <= last_row; i++) {
+       name.push(info_sheet.getRange(i, 1).getValue());
+       }
+  var checkRow = name.indexOf(userData[0]) + 1;
+  
+  var salary = info_sheet.getRange(checkRow + 1, 3).getValue();
+  console.log(salary);
   
 }
 
