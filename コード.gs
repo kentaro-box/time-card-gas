@@ -409,6 +409,8 @@ function timeOutRecord(userData) {
 
 
   writeTime(sheet);
+  
+  sumTime(sheet, spreadsheet, userData);
 
 
   if (typeof morning_out_legal_time != "undefined" && midnight_out_legal_time != "undefined") {
@@ -637,5 +639,48 @@ function writeTime(sheet) {
     sheet.getRange(2, 18).setFormula(midnight_has_color_sum);
   }
 
+}
+
+function sumTime(sheet, spreadsheet, userData) {
+  
+  
+  // 丸める時間取得
+  //  var prop = PropertiesService.getScriptProperties();
+  //  var res = prop.getProperty("判定用シートID");
+  //
+  //  var spreadsheet = SpreadsheetApp.openById(res);
+  //  var TimeCardsheet = spreadsheet.getSheetByName('CompanyRegulations');
+  //  var ceiling = TimeCardsheet.getRange(2, 1).getValue();
+  //  
+  //  console.log(ceiling);
+  //  console.log(typeof ceiling);
+  //  
+  //  consoe.log(2222);
+
+  // 日時取得
+  var [now, year, month, day, weekName, hour, min, sec, s, today] = getToday();
+  // 法定時間外判別用
+
+  var lastRow = sheet.getLastRow(); //対象となるシートの最終行を取得
+  
+  var multiply_col13 = sheet.getRange(2, 13).getValue();
+  var multiply_col14 = sheet.getRange(2, 14).getValue();
+  var multiply_col15 = sheet.getRange(2, 15).getValue();
+  var multiply_col16 = sheet.getRange(2, 16).getValue();
+  var multiply_col17 = sheet.getRange(2, 17).getValue();
+  var multiply_col18 = sheet.getRange(2, 18).getValue();
+  
+ 
+  var multiply_1 = Number(new Date(multiply_col13).getHours()) + Number(new Date(multiply_col13).getMinutes()/60);
+  var multiply_125 = (Number(new Date(multiply_col17).getHours()) + Number(new Date(multiply_col17).getMinutes()/60)) + (Number(new Date(multiply_col15).getHours()) + Number(new Date(multiply_col15).getMinutes()/60));
+  var multiply_135 = Number(new Date(multiply_col14).getHours()) + Number(new Date(multiply_col14).getMinutes()/60);
+  var multiply_160 = (Number(new Date(multiply_col16).getHours()) + Number(new Date(multiply_col16).getMinutes()/60)) + (Number(new Date(multiply_col18).getHours()) + Number(new Date(multiply_col18).getMinutes()/60));
+  
+  sheet.getRange(14, 1).setValue(multiply_1);
+  sheet.getRange(14, 2).setValue(multiply_125);
+  sheet.getRange(14, 3).setValue(multiply_135);
+  sheet.getRange(14, 4).setValue(multiply_160);
+  
+  
 }
 
