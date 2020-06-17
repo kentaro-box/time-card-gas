@@ -324,6 +324,8 @@ function timeOutRecord(userData) {
 
     if (get_time_end > next_day.getTime()) {
       console.log(6);
+      console.log("rr"+computeDuration(18000));
+
       var next_day_out_leagl_time = get_time_end - next_day.getTime();
       work_out_leagl_time = work_out_leagl_time - next_day_out_leagl_time;
       work_time = work_time - work_out_leagl_time;
@@ -389,6 +391,7 @@ function timeOutRecord(userData) {
       }
       sheet.getRange(lastRow, 10).setNumberFormat('H:mm')
 
+      
       next_day_out_leagl_time = computeDuration(next_day_out_leagl_time);
       sheet.getRange(lastRow, 10).setValue(next_day_out_leagl_time);
     }
@@ -411,13 +414,14 @@ function timeOutRecord(userData) {
   writeTime(sheet);
   Utilities.sleep(500);
   
+  console.log("rr"+computeDuration(18000));
+  
   sumTime(sheet, spreadsheet, userData);
 
 
   if (typeof morning_out_legal_time != "undefined" && midnight_out_legal_time != "undefined") {
     return "長時間お疲れ様でした！\nお気をつけておかえりくださいね！";
   }
-
 
 
 
@@ -682,8 +686,46 @@ function sumTime(sheet, spreadsheet, userData) {
   }
     var personal_sheet = spreadsheet.getSheetByName(year + "/" + month);
   
-  personal_sheet.getRange(1, 1).setValue(multiply_1);
-  personalData(userData);
+  var salary = personalData(userData);
+  
+  personal_sheet.getRange(1, 1).setValue("出勤日数");
+  personal_sheet.getRange(2, 1).setValue(lastRow - 1);
+  
+ 
+  personal_sheet.getRange(1, 2).setValue("通常");
+  multiply_1 = Math.floor(multiply_1 * 100) / 100;
+  personal_sheet.getRange(2, 2).setValue(multiply_1);
+  personal_sheet.getRange(4, 2).setValue("通常 金額");
+  personal_sheet.getRange(5, 2).setValue(multiply_1 * salary);
+  
+
+  personal_sheet.getRange(1, 3).setValue("1.25割増時間");
+  multiply_125 = Math.floor(multiply_125 * 100) / 100;
+  personal_sheet.getRange(2, 3).setValue(multiply_125);
+  personal_sheet.getRange(4, 3).setValue("1.25割増 金額");
+  personal_sheet.getRange(5, 3).setValue(Math.floor(multiply_125 * (salary * 1.25)));
+  
+  personal_sheet.getRange(1, 4).setValue("1.35割増時間");
+  multiply_135 = Math.floor(multiply_135 * 100) / 100;
+  personal_sheet.getRange(2, 4).setValue(multiply_135);
+  personal_sheet.getRange(4, 4).setValue("1.35割増 金額");
+  personal_sheet.getRange(5, 4).setValue(Math.floor(multiply_135 * (salary * 1.35)));
+  
+  personal_sheet.getRange(1, 5).setValue("1.6割増時間");
+  multiply_160 = Math.floor(multiply_160 * 100) / 100;
+  personal_sheet.getRange(2, 5).setValue(multiply_160);
+  personal_sheet.getRange(4, 5).setValue("1.6割増 金額");
+  personal_sheet.getRange(5, 5).setValue(Math.floor(multiply_160 * (salary * 1.6)));
+  
+  personal_sheet.getRange(1, 7).setValue("時給");
+  personal_sheet.getRange(2, 7).setValue(salary);
+  
+  
+  personal_sheet.getRange(4, 7).setValue("総額");
+  personal_sheet.getRange(5, 7).setValue("=SUM(B5,C5,D5,E5)");
+  personal_sheet.getRange(4, 1).setValue("労働時間合計");
+  personal_sheet.getRange(5, 1).setValue("=SUM(B2,C2,D2,E2)");
+  
 }
 
 function personalData(userData) {
@@ -700,7 +742,6 @@ function personalData(userData) {
   var checkRow = name.indexOf(userData[0]) + 1;
   
   var salary = info_sheet.getRange(checkRow + 1, 3).getValue();
-  console.log(salary);
-  
+  return salary;
 }
 
