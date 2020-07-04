@@ -333,6 +333,12 @@ function timeOutRecord(userData) {
   } else {
     var work_time = get_time_end - get_time_start;
     console.log(work_time);
+    sheet.getRange(lastRow, 5).setNumberFormat('H:mm')
+    sheet.getRange(lastRow, 5).setValue(0);
+    sheet.getRange(lastRow, 6).setNumberFormat('H:mm')
+    sheet.getRange(lastRow, 6).setValue(0);
+    sheet.getRange(lastRow, 7).setNumberFormat('H:mm')
+    sheet.getRange(lastRow, 7).setValue(0);
   }
 
   // 法定外で休憩
@@ -343,7 +349,6 @@ function timeOutRecord(userData) {
 
   if (typeof midnight_out_legal_time != "undefined") {
     work_out_leagl_time = work_out_leagl_time - midnight_out_legal_time;
-    console.log("aaaa");
     work_time - midnight_out_legal_time;
   }
 
@@ -355,6 +360,11 @@ function timeOutRecord(userData) {
   if (typeof work_out_leagl_time == 'undefined') {
     sheet.getRange(lastRow, 9).setNumberFormat('H:mm')
     sheet.getRange(lastRow, 9).setValue(0);
+     if (typeof next_day_out_leagl_time == 'undefined') {
+
+      sheet.getRange(lastRow, 10).setNumberFormat('H:mm')
+      sheet.getRange(lastRow, 10).setValue(0);
+    } 
   } else {
     sheet.getRange(lastRow, 9).setNumberFormat('H:mm')
     work_time - work_out_leagl_time;
@@ -400,7 +410,6 @@ function timeOutRecord(userData) {
   work_time = computeDuration(work_time);
 
   sheet.getRange(lastRow, 8).setNumberFormat('H:mm')
-  //     sheet.getRange(lastRow, 8).strformula("=CEILING("+ work_time + ",0:15)");
   sheet.getRange(lastRow, 8).setValue(work_time);
 
   // ミリ秒変換
@@ -553,8 +562,12 @@ function writeTime(sheet) {
 
   // 通常時間割増
   if (has_color.length > 0) {
-    sheet.getRange(1, 14).setValue("休日シフト時間");
-    sheet.getRange(1, 16).setValue("休日シフト深夜時間");
+    sheet.getRange(1, 14).setValue("通常時間合計");
+    sheet.getRange(1, 15).setValue("休日シフト時間")
+    sheet.getRange(1, 16).setValue("通常深夜");
+    sheet.getRange(1, 17).setValue("休日シフト深夜時間");
+    sheet.getRange(1, 18).setValue("深夜翌日またぎ 平日");
+    sheet.getRange(1, 19).setValue("休日深夜翌日またぎ 割増");
     var has_color_sum;
     var has_color_out_time_sum;
     for (var h = 0; h < has_color.length; h++) {
@@ -579,8 +592,9 @@ function writeTime(sheet) {
       }
     }
     // 休日時間割増
-    sheet.getRange(2, 14).setNumberFormat('[h]:mm')
-    sheet.getRange(2, 14).setFormula(has_color_sum);
+    
+    sheet.getRange(2, 15).setNumberFormat('[h]:mm')
+    sheet.getRange(2, 15).setFormula(has_color_sum);
     sheet.getRange(2, 16).setNumberFormat('[h]:mm')
     sheet.getRange(2, 16).setFormula(has_color_out_time_sum);
 
@@ -673,11 +687,15 @@ function sumTime(sheet, spreadsheet, userData) {
   var multiply_col17_m = Number(multiply_col17[1])/60;
   var multiply_col18_h = Number(multiply_col18[0]);
   var multiply_col18_m = Number(multiply_col18[1])/60;
-  
+  console.log(multiply_col16_h);
+  console.log(multiply_col18_h);
+  console.log(multiply_col16_m);
+  console.log(multiply_col18_m);
   
   var multiply_1 = multiply_col13_h + multiply_col13_m;
   var multiply_125 = (multiply_col17_h + multiply_col15_h) + (multiply_col17_m + multiply_col15_m);
   var multiply_135 = multiply_col14_h + multiply_col14_m;
+  console.log(multiply_col16_h + multiply_col18_h+":"+multiply_col16_m + multiply_col18_m);
   var multiply_160 = (multiply_col16_h + multiply_col18_h) + (multiply_col16_m + multiply_col18_m);
   
   
@@ -713,6 +731,7 @@ function sumTime(sheet, spreadsheet, userData) {
   
   personal_sheet.getRange(1, 5).setValue("1.6割増時間");
   multiply_160 = Math.floor(multiply_160 * 100) / 100;
+  console.log("multiply_160:"+multiply_160);
   personal_sheet.getRange(2, 5).setValue(multiply_160);
   personal_sheet.getRange(4, 5).setValue("1.6割増 金額");
   personal_sheet.getRange(5, 5).setValue(Math.floor(multiply_160 * (salary * 1.6)));
